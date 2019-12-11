@@ -2,7 +2,7 @@ import numpy as np # for pretty printing a matrix...
 import time
 
 CONSTANTS = {}
-START_INSTRUCTIONS = 'run game.new_game() to start'
+START_INSTRUCTIONS = 'run game.new_game() to start. Optionally pass ai=True or cpu=True for another player'
 
 print(START_INSTRUCTIONS)
 
@@ -28,46 +28,49 @@ def start_game(board, current, winning_combos):
             print(f"{CONSTANTS['restart_instructions']}")
             break
 
-# no tests!
+# no tests #
 def take_turn(board, current):
-    '''taking a turn using input prompt'''
+    '''taking a turn using input prompt or using random CPU choice'''
     free_space_array = free_spaces(board)
 
-    # import random
-    #
-    # print("Where should I move?")
-    # cities = ["Seattle", "Portland", "San Francisco", "Vancouver"]
-    # city = random.choice(cities)
-    # print("That's it. I'm moving to", city)
+    # cpu is always player 2
     cpus_turn = (CONSTANTS['cpu'] and current == CONSTANTS['players'][1])
     if(CONSTANTS['ai'] or cpus_turn):
-        import random
-        x,y = random.choice(free_space_array)
-        print(f'{current}\'s turn. Waiting for cpu...')
-        time.sleep( random.choice(range(1,3)) )
-        print(f'{current} choze {x},{y}')
+        x,y = cpu_choose_space(current, free_space_array)
     else:
-        # try some error handling...
-        while True:
-            try:
-                choice = input(f"{current}, what space would you like? spaces available: {free_space_array}")
-                x,y = choice.split(",")
-                # TODO: ensure space is actually free...
-                board[int(x)][int(y)] = current
-                # or use insert?
-            except ValueError:
-                print('try again...use the format 2,2 or 0,0')
-                continue
-            except IndexError:
-                print('try again...make sure to stay within limits!')
-                continue
-            except Exception:
-                print('what did you do?!?!?!')
-                raise
-            break
+        x,y = user_choose_space(current, free_space_array)
 
     board[int(x)][int(y)] = current
     print(f'board is now\n {np.matrix(board)}')
+
+def cpu_choose_space(current, free_space_array):
+    import random
+    x,y = random.choice(free_space_array)
+    print(f'{current}\'s turn. Waiting for cpu...')
+    time.sleep( random.choice(range(1,3)) )
+    print(f'{current} choze {x},{y}')
+    return (x,y)
+
+def user_choose_space(current, free_space_array):
+    # try some error handling...
+    while True:
+        try:
+            choice = input(f"{current}, what space would you like? spaces available: {free_space_array}")
+            x,y = choice.split(",")
+            # TODO: ensure space is actually free...
+            # board[int(x)][int(y)] = current
+            # or use insert?
+        except ValueError:
+            print('try again...use the format 2,2 or 0,0')
+            continue
+        except IndexError:
+            print('try again...make sure to stay within limits!')
+            continue
+        except Exception:
+            print('what did you do?!?!?!')
+            raise
+        break
+    return (x,y)
 
 def check_for_winner(board, winningCombos, player):
     ''' check board for winner. returns True or False, and winning sequence if there is one '''
