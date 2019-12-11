@@ -1,6 +1,6 @@
 from flask import Flask
 from inspect import currentframe
-from game import CONSTANTS as GAME_CONSTANTS, winning_combos, free_spaces, switch_player, get_player_positions, check_for_winner, check_for_draw, get_1d_board, reset_game
+from game import CONSTANTS as GAME_CONSTANTS, winning_combos, free_spaces, switch_player, check_for_winner, check_for_draw, get_1d_board, reset_game
 
 app = Flask(__name__)
 
@@ -80,7 +80,7 @@ def test_check_for_no_draw(board, winningCombos):
 def test_get_player_positions(board, player):
     meth = get_meth_name(currentframe())
     print(f'{meth} return indexes where player tokens are')#.format(meth=meth))
-    current_board = get_player_positions(board, player)
+    current_board = get_1d_board(board, player)
     test_board_x_indexes = [0,1,3,4,8]
     expect_equality(meth, current_board, test_board_x_indexes)
 
