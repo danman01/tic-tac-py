@@ -1,4 +1,5 @@
 import numpy as np # for pretty printing a matrix...
+import time
 
 CONSTANTS = {}
 START_INSTRUCTIONS = 'run game.new_game() to start'
@@ -10,6 +11,7 @@ def start_game(board, current, winning_combos):
     turn = 0
     while(turn < 9):
         # make sure to set empty strings for non-filled spaces, otherwise out of range error
+        print(f'turn {turn}:')
         take_turn(board, current)
         turn += 1
         winner, sequence = check_for_winner(board, winning_combos, current)
@@ -31,11 +33,40 @@ def take_turn(board, current):
     '''taking a turn using input prompt'''
     free_space_array = free_spaces(board)
 
-    res_string = input(f"{current}, what space would you like? spaces available: {free_space_array}")
-    x,y = res_string.split(",")
-    board[int(x)][int(y)] = current
-    # or use insert?
+    # import random
+    #
+    # print("Where should I move?")
+    # cities = ["Seattle", "Portland", "San Francisco", "Vancouver"]
+    # city = random.choice(cities)
+    # print("That's it. I'm moving to", city)
+    cpus_turn = (CONSTANTS['cpu'] and current == CONSTANTS['players'][1])
+    if(CONSTANTS['ai'] or cpus_turn):
+        import random
+        x,y = random.choice(free_space_array)
+        print(f'{current}\'s turn. Waiting for cpu...')
+        time.sleep( random.choice(range(1,3)) )
+        print(f'{current} choze {x},{y}')
+    else:
+        # try some error handling...
+        while True:
+            try:
+                choice = input(f"{current}, what space would you like? spaces available: {free_space_array}")
+                x,y = choice.split(",")
+                # TODO: ensure space is actually free...
+                board[int(x)][int(y)] = current
+                # or use insert?
+            except ValueError:
+                print('try again...use the format 2,2 or 0,0')
+                continue
+            except IndexError:
+                print('try again...make sure to stay within limits!')
+                continue
+            except Exception:
+                print('what did you do?!?!?!')
+                raise
+            break
 
+    board[int(x)][int(y)] = current
     print(f'board is now\n {np.matrix(board)}')
 
 def check_for_winner(board, winningCombos, player):
@@ -118,14 +149,18 @@ def switch_player(current):
     else:
         return CONSTANTS['players'][0]
 
-def reset_game():
-    _setup()
+def reset_game(ai, cpu):
+    _setup(ai, cpu)
     return 'reset...'
 
-def _setup():
+def _setup(ai, cpu):
     CONSTANTS['players'] = [input("Player 1:"), input("Player 2:")]
     CONSTANTS['current_player'] = CONSTANTS['players'][0]
     CONSTANTS['winning_combos'] = winning_combos()
+    CONSTANTS['ai'] = ai
+    CONSTANTS['cpu'] = cpu
+    CONSTANTS['start_time'] = time.ctime()
+    CONSTANTS['end_time'] = None
     CONSTANTS['restart_instructions'] = START_INSTRUCTIONS.replace('start','restart')
     CONSTANTS['board'] = [
         ['','',''],
@@ -136,8 +171,8 @@ def _setup():
 def play():
     start_game(CONSTANTS['board'], CONSTANTS['current_player'], CONSTANTS['winning_combos'])
 
-def new_game():
-    reset_game()
+def new_game(ai=False, cpu=False):
+    reset_game(ai, cpu)
     play()
 
 def winning_combos():

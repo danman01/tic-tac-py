@@ -4,7 +4,7 @@ from game import CONSTANTS as GAME_CONSTANTS, winning_combos, free_spaces, switc
 
 app = Flask(__name__)
 
-reset_game()
+reset_game(ai=False, cpu=False)
 # Unit tests #
 CONSTANTS = {}
 print('run_unit_tests() to run tests...pass debug=true to turn on debugger when error')
@@ -119,7 +119,7 @@ def test_get_1d_board(board):
     correct_1d_board = ['X','X','O','X','X','O','O','O','X']
     expect_equality(meth, new_board, correct_1d_board)
 
-def test_reset_game():
+def test_reset_game(ai=False, cpu=False):
     meth = get_meth_name(currentframe())
     print(f'{meth} resetting game and game constants')
     board = GAME_CONSTANTS['board']
@@ -128,7 +128,7 @@ def test_reset_game():
         ['','',''],
         ['','','']
     ]
-    reset_game()
+    reset_game(ai, cpu)
     free_spaces_array = free_spaces(board)
     expect_equality(meth, get_1d_board(board), get_1d_board(fresh_board))
     expect_equality(meth, len(free_spaces_array), 9)
@@ -147,7 +147,7 @@ def run_unit_tests(debug = False):
     test_check_for_draw(CONSTANTS['draw_game'], winning_combos())
     test_check_for_no_draw(CONSTANTS['incomplete_game'], winning_combos())
     test_get_1d_board(CONSTANTS['completed_game'])
-    test_reset_game()
+    test_reset_game(ai=False, cpu=False)
 
 
     # print errors:
